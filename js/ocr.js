@@ -22,7 +22,7 @@ async function extraerTextoDeFactura(imagenBase64) {
     requests: [
       {
         image: { content: imagenBase64 },
-        features: [{ type: 'TEXT_DETECTION', maxResults: 1 }]
+        features: [{ type: 'DOCUMENT_TEXT_DETECTION', maxResults: 1 }]
       }
     ]
   };

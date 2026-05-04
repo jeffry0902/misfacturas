@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mis Facturas</title>
-  <!-- Tailwind CSS Play CDN (sin build, para desarrollo) -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
@@ -18,67 +17,56 @@
   <!-- Contenido principal -->
   <main class="flex-1 flex flex-col items-center px-4 py-8 gap-6 max-w-md mx-auto w-full">
 
-    <!-- Input oculto para la cámara (manejado desde camera.js) -->
-    <input
-      id="inputCamara"
-      type="file"
-      accept="image/*"
-      capture="environment"
-      class="hidden"
-    />
+    <!-- Input oculto para la cámara -->
+    <input id="inputCamara" type="file" accept="image/*" capture="environment" class="hidden" />
 
     <!-- Botón principal de escaneo -->
-    <button
-      id="btnEscanear"
+    <button id="btnEscanear"
       class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800
              text-white text-xl font-semibold py-5 px-6 rounded-2xl
-             shadow-lg transition-all duration-150 flex items-center justify-center gap-3"
-    >
+             shadow-lg transition-all duration-150 flex items-center justify-center gap-3">
       <span class="text-3xl">📷</span>
       Escanear factura
     </button>
 
-    <!-- Área de previsualización de la imagen capturada -->
+    <!-- Área de previsualización -->
     <section id="areaPreview" class="w-full hidden">
       <p class="text-sm text-gray-500 mb-2 text-center">Foto capturada:</p>
       <div class="rounded-2xl overflow-hidden shadow-md border border-gray-200 bg-white">
-        <img
-          id="imgPreview"
-          src=""
-          alt="Factura capturada"
-          class="w-full object-contain max-h-96"
-        />
+        <img id="imgPreview" src="" alt="Factura capturada" class="w-full object-contain max-h-96" />
       </div>
     </section>
 
-    <!-- Placeholder cuando aún no hay foto -->
+    <!-- Placeholder cuando no hay foto -->
     <section id="areaPlaceholder"
       class="w-full flex flex-col items-center justify-center gap-3
-             border-2 border-dashed border-gray-300 rounded-2xl py-12 px-4 text-gray-400"
-    >
+             border-2 border-dashed border-gray-300 rounded-2xl py-12 px-4 text-gray-400">
       <span class="text-5xl">🧾</span>
       <p class="text-sm text-center">La foto de tu factura aparecerá aquí</p>
     </section>
 
-    <!-- ── Área de resultado OCR ───────────────────────────────────── -->
+    <!-- ── Área OCR ─────────────────────────────────────────────────────── -->
     <section id="areaOcr" class="w-full hidden flex-col gap-3">
 
       <!-- Estado: procesando -->
       <div id="ocrCargando" class="hidden items-center justify-center gap-3 py-4">
-        <!-- Spinner animado con Tailwind -->
         <div class="w-6 h-6 border-4 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
         <span class="text-indigo-600 font-medium">Procesando imagen…</span>
       </div>
 
-      <!-- Estado: texto extraído -->
+      <!-- Estado: texto extraído (colapsado por defecto) -->
       <div id="ocrResultado" class="hidden">
-        <p class="text-sm text-gray-500 mb-2">Texto extraído:</p>
-        <pre
-          id="ocrTexto"
-          class="bg-gray-100 text-gray-800 text-xs font-mono leading-relaxed
-                 rounded-xl p-4 overflow-y-auto max-h-64 whitespace-pre-wrap break-words
-                 border border-gray-200 shadow-inner"
-        ></pre>
+        <button id="btnVerOcr"
+          class="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 w-full text-left py-1">
+          <span id="iconoVerOcr" class="text-xs">▶</span>
+          Ver texto crudo del OCR
+        </button>
+        <div id="contenidoOcr" class="hidden mt-2">
+          <pre id="ocrTexto"
+            class="bg-gray-100 text-gray-800 text-xs font-mono leading-relaxed
+                   rounded-xl p-4 overflow-y-auto max-h-64 whitespace-pre-wrap break-words
+                   border border-gray-200 shadow-inner"></pre>
+        </div>
       </div>
 
       <!-- Estado: error -->
@@ -88,13 +76,74 @@
       </div>
 
     </section>
-    <!-- ── Fin área OCR ────────────────────────────────────────────── -->
+
+    <!-- ── Pantalla de revisión ─────────────────────────────────────────── -->
+    <section id="areaRevision" class="w-full hidden flex-col gap-5">
+
+      <!-- Aviso: tienda no reconocida -->
+      <div id="avisoTiendaDesconocida"
+        class="hidden bg-amber-50 border border-amber-300 rounded-xl p-3">
+        <p class="text-amber-700 text-sm">
+          ⚠️ No reconocimos esta tienda. Revisa y completa los datos manualmente.
+        </p>
+      </div>
+
+      <!-- Encabezado de la factura -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 flex flex-col gap-4">
+        <h2 class="font-semibold text-gray-700">Datos de la factura</h2>
+
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" for="revTienda">Tienda</label>
+          <input id="revTienda" type="text"
+            class="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        </div>
+
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" for="revFecha">Fecha</label>
+          <input id="revFecha" type="date"
+            class="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        </div>
+
+        <div>
+          <label class="text-xs text-gray-500 mb-1 block" for="revTotal">Total ($)</label>
+          <input id="revTotal" type="number" min="0"
+            class="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+        </div>
+      </div>
+
+      <!-- Lista de productos -->
+      <div>
+        <h2 class="font-semibold text-gray-700 mb-3">Productos</h2>
+        <div id="listaItemsRevision" class="flex flex-col gap-3"></div>
+      </div>
+
+      <!-- Botón agregar item -->
+      <button id="btnAgregarItem"
+        class="w-full border-2 border-dashed border-indigo-300 text-indigo-500
+               hover:border-indigo-400 hover:text-indigo-600
+               font-medium py-4 rounded-2xl transition-colors duration-150">
+        + Agregar producto
+      </button>
+
+      <!-- Botón guardar -->
+      <button id="btnGuardar"
+        class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800
+               text-white text-lg font-semibold py-5 rounded-2xl
+               shadow-lg transition-all duration-150 flex items-center justify-center gap-2 mb-4">
+        <span>💾</span>
+        Guardar factura
+      </button>
+
+    </section>
+    <!-- ── Fin pantalla de revisión ─────────────────────────────────────── -->
 
   </main>
 
-  <!-- config.js debe cargarse primero (contiene la API key) -->
+  <!-- Orden de carga: config → OCR → parsers → cámara -->
   <script src="config.js"></script>
   <script src="js/ocr.js"></script>
+  <script src="js/parsers/brasimgus.js"></script>
+  <script src="js/parsers/index.js"></script>
   <script src="js/camera.js"></script>
 </body>
 </html>
