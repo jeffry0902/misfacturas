@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis Facturas</title>
+  <!-- Tailwind CSS Play CDN (sin build, para desarrollo) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Encabezado -->
+  <header class="bg-indigo-600 text-white py-5 px-4 shadow-md">
+    <h1 class="text-2xl font-bold text-center tracking-wide">🧾 Mis Facturas</h1>
+    <p class="text-center text-indigo-200 text-sm mt-1">Control de gastos por producto</p>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="flex-1 flex flex-col items-center px-4 py-8 gap-6 max-w-md mx-auto w-full">
+
+    <!-- Input oculto para la cámara (manejado desde camera.js) -->
+    <input
+      id="inputCamara"
+      type="file"
+      accept="image/*"
+      capture="environment"
+      class="hidden"
+    />
+
+    <!-- Botón principal de escaneo -->
+    <button
+      id="btnEscanear"
+      class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800
+             text-white text-xl font-semibold py-5 px-6 rounded-2xl
+             shadow-lg transition-all duration-150 flex items-center justify-center gap-3"
+    >
+      <span class="text-3xl">📷</span>
+      Escanear factura
+    </button>
+
+    <!-- Área de previsualización de la imagen capturada -->
+    <section id="areaPreview" class="w-full hidden">
+      <p class="text-sm text-gray-500 mb-2 text-center">Foto capturada:</p>
+      <div class="rounded-2xl overflow-hidden shadow-md border border-gray-200 bg-white">
+        <img
+          id="imgPreview"
+          src=""
+          alt="Factura capturada"
+          class="w-full object-contain max-h-96"
+        />
+      </div>
+    </section>
+
+    <!-- Placeholder cuando aún no hay foto -->
+    <section id="areaPlaceholder"
+      class="w-full flex flex-col items-center justify-center gap-3
+             border-2 border-dashed border-gray-300 rounded-2xl py-12 px-4 text-gray-400"
+    >
+      <span class="text-5xl">🧾</span>
+      <p class="text-sm text-center">La foto de tu factura aparecerá aquí</p>
+    </section>
+
+  </main>
+
+  <script src="js/camera.js"></script>
+</body>
+</html>
