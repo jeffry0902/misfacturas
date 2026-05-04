@@ -1,4 +1,4 @@
-// camera.js — Maneja la captura de foto desde la cámara del dispositivo
+// camera.js — Maneja la captura de foto y dispara el OCR
 
 // Referencias a los elementos del DOM
 const btnEscanear     = document.getElementById('btnEscanear');
@@ -6,6 +6,14 @@ const inputCamara     = document.getElementById('inputCamara');
 const areaPreview     = document.getElementById('areaPreview');
 const areaPlaceholder = document.getElementById('areaPlaceholder');
 const imgPreview      = document.getElementById('imgPreview');
+
+// Elementos del área OCR
+const areaOcr         = document.getElementById('areaOcr');
+const ocrCargando     = document.getElementById('ocrCargando');
+const ocrResultado    = document.getElementById('ocrResultado');
+const ocrTexto        = document.getElementById('ocrTexto');
+const ocrError        = document.getElementById('ocrError');
+const ocrErrorMensaje = document.getElementById('ocrErrorMensaje');
 
 // Al hacer clic en el botón, activamos el input de archivo (que abre la cámara)
 btnEscanear.addEventListener('click', () => {
@@ -16,30 +24,69 @@ btnEscanear.addEventListener('click', () => {
 inputCamara.addEventListener('change', (evento) => {
   const archivo = evento.target.files[0];
 
-  // Si no se seleccionó ningún archivo, no hacemos nada
   if (!archivo) return;
 
-  // Verificamos que el archivo sea una imagen
   if (!archivo.type.startsWith('image/')) {
     alert('Por favor selecciona una imagen válida.');
     return;
   }
 
-  // Creamos una URL temporal en memoria para mostrar la imagen sin subirla a ningún servidor
-  const urlTemporal = URL.createObjectURL(archivo);
-
-  // Asignamos la URL al elemento <img> para mostrar la foto
-  imgPreview.src = urlTemporal;
-
-  // Mostramos el área de previsualización y ocultamos el placeholder
-  areaPlaceholder.classList.add('hidden');
-  areaPreview.classList.remove('hidden');
-
-  // Liberamos la URL temporal de memoria cuando la imagen termine de cargar
-  imgPreview.addEventListener('load', () => {
-    URL.revokeObjectURL(urlTemporal);
-  }, { once: true });
-
-  // Limpiamos el input para permitir volver a tomar la misma foto si se desea
+  // Limpiamos el input para permitir volver a seleccionar la misma foto
   inputCamara.value = '';
+
+  // Leemos el archivo como Data URL (base64) — nos sirve tanto para
+  // mostrar la imagen como para enviarla a Vision API
+  const lector = new FileReader();
+
+  lector.addEventListener('load', async (e) => {
+    const dataUrl = e.target.result; // "data:image/jpeg;base64,XXXX..."
+
+    // Mostramos la imagen capturada
+    imgPreview.src = dataUrl;
+    areaPlaceholder.classList.add('hidden');
+    areaPreview.classList.remove('hidden');
+
+    // Preparamos el área OCR: mostramos spinner, ocultamos resultados anteriores
+    mostrarEstadoOcr('cargando');
+
+    // Extraemos solo la parte base64, sin el prefijo "data:image/...;base64,"
+    const base64 = dataUrl.split(',')[1];
+
+    try {
+      const texto = await extraerTextoDeFactura(base64);
+      mostrarEstadoOcr('resultado', texto);
+    } catch (error) {
+      mostrarEstadoOcr('error', error.message);
+    }
+  });
+
+  lector.readAsDataURL(archivo);
 });
+
+/**
+ * Controla qué sub-estado muestra el área OCR.
+ * @param {'cargando'|'resultado'|'error'} estado
+ * @param {string} [contenido] Texto extraído o mensaje de error
+ */
+function mostrarEstadoOcr(estado, contenido = '') {
+  // Primero hacemos visible el contenedor padre
+  areaOcr.classList.remove('hidden');
+  areaOcr.classList.add('flex');
+
+  // Ocultamos los tres sub-estados
+  ocrCargando.classList.add('hidden');
+  ocrCargando.classList.remove('flex');
+  ocrResultado.classList.add('hidden');
+  ocrError.classList.add('hidden');
+
+  if (estado === 'cargando') {
+    ocrCargando.classList.remove('hidden');
+    ocrCargando.classList.add('flex');
+  } else if (estado === 'resultado') {
+    ocrTexto.textContent = contenido;
+    ocrResultado.classList.remove('hidden');
+  } else if (estado === 'error') {
+    ocrErrorMensaje.textContent = contenido;
+    ocrError.classList.remove('hidden');
+  }
+}

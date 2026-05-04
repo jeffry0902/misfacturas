@@ -1,0 +1,1 @@
+const CONFIG = { GOOGLE_VISION_API_KEY: "AIzaSyDDQdJtvry8tuWpK2hZctb4VRqXqpCaLCw" };

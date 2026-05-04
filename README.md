@@ -9,8 +9,8 @@ Aplicación web progresiva (PWA) para escanear facturas de compras y llevar un c
 | Hito | Descripción | Estado |
 |------|-------------|--------|
 | 1 | Esqueleto inicial con captura de foto | ✅ Listo |
-| 2 | PWA: manifest + service worker (funciona offline) | ⬜ Pendiente |
-| 3 | OCR: extracción de texto de la foto (Tesseract.js) | ⬜ Pendiente |
+| 2 | OCR con Google Cloud Vision API | ✅ Listo |
+| 3 | PWA: manifest + service worker (funciona offline) | ⬜ Pendiente |
 | 4 | Base de datos local (IndexedDB) para guardar facturas | ⬜ Pendiente |
 | 5 | Listado y búsqueda de gastos por producto | ⬜ Pendiente |
 | 6 | Reportes y gráficas de gastos | ⬜ Pendiente |
@@ -22,8 +22,10 @@ Aplicación web progresiva (PWA) para escanear facturas de compras y llevar un c
 ```
 misfacturas/
 ├── index.html       # Interfaz principal
+├── config.js        # API key (en .gitignore, no se sube)
 ├── js/
-│   └── camera.js    # Lógica de captura de foto
+│   ├── camera.js    # Captura de foto y coordinación OCR
+│   └── ocr.js       # Llamada a Google Cloud Vision API
 └── README.md
 ```
 

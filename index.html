@@ -60,8 +60,41 @@
       <p class="text-sm text-center">La foto de tu factura aparecerá aquí</p>
     </section>
 
+    <!-- ── Área de resultado OCR ───────────────────────────────────── -->
+    <section id="areaOcr" class="w-full hidden flex-col gap-3">
+
+      <!-- Estado: procesando -->
+      <div id="ocrCargando" class="hidden items-center justify-center gap-3 py-4">
+        <!-- Spinner animado con Tailwind -->
+        <div class="w-6 h-6 border-4 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
+        <span class="text-indigo-600 font-medium">Procesando imagen…</span>
+      </div>
+
+      <!-- Estado: texto extraído -->
+      <div id="ocrResultado" class="hidden">
+        <p class="text-sm text-gray-500 mb-2">Texto extraído:</p>
+        <pre
+          id="ocrTexto"
+          class="bg-gray-100 text-gray-800 text-xs font-mono leading-relaxed
+                 rounded-xl p-4 overflow-y-auto max-h-64 whitespace-pre-wrap break-words
+                 border border-gray-200 shadow-inner"
+        ></pre>
+      </div>
+
+      <!-- Estado: error -->
+      <div id="ocrError" class="hidden bg-red-50 border border-red-200 rounded-xl p-4">
+        <p class="text-red-600 font-semibold text-sm mb-1">⚠️ Error al procesar la imagen</p>
+        <p id="ocrErrorMensaje" class="text-red-500 text-xs"></p>
+      </div>
+
+    </section>
+    <!-- ── Fin área OCR ────────────────────────────────────────────── -->
+
   </main>
 
+  <!-- config.js debe cargarse primero (contiene la API key) -->
+  <script src="config.js"></script>
+  <script src="js/ocr.js"></script>
   <script src="js/camera.js"></script>
 </body>
 </html>
